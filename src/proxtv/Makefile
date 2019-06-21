@@ -38,7 +38,7 @@ endif
 ifeq ($(CXX), icpc)
     CXXFLAGS = -mkl=sequential -O3 -fPIC -D NOMATLAB=1
 else
-    CXXFLAGS = -O3 -fPIC -I$(CONDA_PREFIX)/include -L$(CONDA_PREFIX)/lib -D NOMATLAB=1
+    CXXFLAGS = -O3 -fPIC -I$(CONDA_PREFIX)/include -L$(CONDA_PREFIX)/lib -D NOMATLAB=1 -I/opt/intel/compilers_and_libraries_2019.4.243/linux/mkl/include/ -L/opt/intel/compilers_and_libraries_2019.4.243/linux/mkl/lib/intel64_lin/ -L/opt/intel/compilers_and_libraries_2019.4.243/linux/compiler/lib/intel64/
 endif
 
 # Recipes
