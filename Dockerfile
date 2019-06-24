@@ -57,16 +57,26 @@ CMD /bin/bash -c "source activate trefide && jupyter notebook --port=8888 --no-b
 
 #############################################
 #############################################
-#FROM trefide AS funimag
-#RUN apt-get -y install git vim libsm6 libxext6 libxrender-dev
+FROM trefide AS funimag
+
+# TODO - brute force searching for system library dependencies...
+RUN apt-get -y update && apt-get -y install gcc \
+																						libglib2.0-0 \
+																						libsm6 \
+																						libxrender1 \
+																						libfontconfig1 \
+																						libxext6 \
+                                            vim \
+                                            git
 
 # Cache-buster; ADD for content from remote source, always retrieved and compared to cached version
 # https://github.com/moby/moby/issues/14704
-#ADD https://api.github.com/repos/nik-sm/funimag/compare/master...HEAD /dev/null
-#RUN git clone https://github.com/nik-sm/funimag.git
-#WORKDIR funimag
-#RUN /bin/bash -c "source activate trefide && pip install -r requirements.txt"
-#RUN /bin/bash -c "source activate trefide && pip install -e ."
+ADD https://api.github.com/repos/nik-sm/funimag/compare/master...HEAD /dev/null
+RUN git clone https://github.com/nik-sm/funimag.git
 
-#WORKDIR demos
-#RUN /bin/bash -c "source activate trefide && python 'Demo Compression & Denoising.py'"
+WORKDIR funimag
+
+EXPOSE 8888
+RUN /bin/bash -c "source activate trefide && pip install -r requirements.txt"
+RUN /bin/bash -c "source activate trefide && pip install -e ."
+CMD /bin/bash -c "source activate trefide && jupyter notebook --no-browser --ip=0.0.0.0 --allow-root --port=8888 --debug"

@@ -20,15 +20,13 @@ from trefide.reformat import overlapping_component_reformat
 
 # Plotting & Video Rendering Dependencies
 import matplotlib.pyplot as plt
-from trefide.plot import pixelwise_ranks
-from trefide.extras.util_plot import comparison_plot
-from trefide.video import play_cv2
+#from trefide.plot import pixelwise_ranks
+#from trefide.extras.util_plot import comparison_plot
+#from trefide.video import play_cv2
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--infile', required=True, help='Input movie *.mat. Must contain a field "data"')
-    # parser.add_argument('-o', '--outdir', required=True, help='Output directory') # TODO - hardcoded to /output for now
-    # parser.add_argument('-t', '--type', choices=['memoryview','file'], required=True, help='either pass a memoryview from MATLAB or provide a file on disk') # TODO - can we avoid intermediate files?
     parser.add_argument('--consec-failures', type=int, required=True, help='consecutive failures. More means more conservative, retaining a higher rank matrix')
     parser.add_argument('--max-components', type=int, required=True, help='')
     parser.add_argument('--max-iters-main', type=int, required=True, help='')
@@ -42,16 +40,10 @@ def main():
     print("Begin with arguments: ", args)
 
     print("loading movie: {}...".format(args.infile))
-    #if args.type == "memoryview":
-    #    print("memoryview")
-    #    mov = np.asarray(args.infile)
-    #else:
-    #    print("file on disk")
-    #    mov = np.load("/input/{}".format(args.infile)) # TODO - hardcoded path within container
-    print("file on disk")
 
     # TODO - justify ascontiguousarray or take it out
-    mov = np.ascontiguousarray(loadmat("/input/{}".format(args.infile))['data'], dtype='double') # TODO - hardcoded path within container
+    # TODO - justify choice of dtype='double' ?
+    mov = np.ascontiguousarray(loadmat("/input/{}".format(args.infile))['inputData'], dtype='double') # TODO - hardcoded path within container
 
     fov_height, fov_width, num_frames = mov.shape
     print("done")
@@ -158,15 +150,15 @@ def main():
     #print("play_cv2")
     #play_cv2(np.vstack([mov, mov_denoised, mov-mov_denoised]), magnification=2)
 
-    #print("overlapping_component_reformat...")
-    #U, V = overlapping_component_reformat(fov_height, fov_width, num_frames,
-    #                                      block_height, block_width,
-    #                                      spatial_components,
-    #                                      temporal_components,
-    #                                      block_ranks,
-    #                                      block_indices,
-    #                                      block_weights)
-    #print("done")
+    print("overlapping_component_reformat...")
+    U, V = overlapping_component_reformat(fov_height, fov_width, num_frames,
+                                          block_height, block_width,
+                                          spatial_components,
+                                          temporal_components,
+                                          block_ranks,
+                                          block_indices,
+                                          block_weights)
+    print("done")
 
     #print("matmul to reconstruct Y...")
     #ushape = U.shape
@@ -187,7 +179,7 @@ def main():
     #savemat(file_name='/output/demo_results.Y.mat', mdict={'Y':Y, 'latent_dim':ushape[-1]})
 
     # TODO - can the latent dimension be read from the "spatial_components" or "temporal_components" objects?
-    savemat(file_name='/output/demo_results.Y.mat', mdict={'Y':mov_denoised.astype(np.uint16)})
+    savemat(file_name='/output/pmd-output.mat', mdict={'Y':mov_denoised.astype(np.uint16), 'U':U, 'V':V})
     print("done")
 
 if __name__ == "__main__":
