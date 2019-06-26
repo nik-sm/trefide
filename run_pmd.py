@@ -89,8 +89,6 @@ def main():
     ## Decompose Each Block Into Spatial & Temporal Components
     print("overlapping: {}".format(overlapping))
 
-
-    # TODO - detrending before denoising, or begin with whole-frame bleach-correction
     if not overlapping:    # Blockwise Parallel, Single Tiling
         print("batch_decompose...")
         spatial_components, temporal_components, block_ranks, block_indices = batch_decompose(fov_height, fov_width, num_frames,
@@ -110,45 +108,6 @@ def main():
                                                                                              d_sub=d_sub, t_sub=t_sub)
         print("done")
 
-    # Reconstruct Denoised Video
-    if not overlapping:  # Single Tiling (No need for reqweighting)
-        print("batch_recompose...")
-        mov_denoised = np.asarray(batch_recompose(spatial_components,
-                                                  temporal_components,
-                                                  block_ranks,
-                                                  block_indices))
-        print("done")
-    else:   # Overlapping Tilings With Reweighting
-        print("overlapping_batch_recompose...")
-        mov_denoised = np.asarray(overlapping_batch_recompose(fov_height, fov_width, num_frames,
-                                                              block_height, block_width,
-                                                              spatial_components,
-                                                              temporal_components,
-                                                              block_ranks,
-                                                              block_indices,
-                                                              block_weights)) 
-        print("done")
-
-    # Produce Diagnostics
-    ### Single Tiling Pixel-Wise Ranks
-    #if overlapping:
-    #    print("pixelwise_ranks...")
-    #    pixelwise_ranks(block_ranks['no_skew']['full'], fov_height, fov_width, num_frames, block_height, block_width)
-    #    print("done")
-    #else:
-    #    print("pixelwise_ranks (overlapping)...")
-    #    pixelwise_ranks(block_ranks, fov_height, fov_width, num_frames, block_height, block_width)
-    #    print("done")
-
-    ### Correlation Images
-
-    #print("comparison_plot")
-    #comparison_plot([mov, mov_denoised + np.random.randn(np.prod(mov.shape)).reshape(mov.shape)*.01],
-    #                plot_orientation="horizontal")
-
-    # play_cv2 seems to be broken, crashes no matter what opencv python library is installed
-    #print("play_cv2")
-    #play_cv2(np.vstack([mov, mov_denoised, mov-mov_denoised]), magnification=2)
 
     print("overlapping_component_reformat...")
     U, V = overlapping_component_reformat(fov_height, fov_width, num_frames,
@@ -160,26 +119,7 @@ def main():
                                           block_weights)
     print("done")
 
-    #print("matmul to reconstruct Y...")
-    #ushape = U.shape
-    #vshape = V.shape
-    ##savemat(file_name='/output/demo_results.UV.mat', mdict={'U':U, 'V':V})
-    #print("U.shape:", ushape)
-    #print("V.shape:", vshape)
-    #U = np.reshape(U, (np.prod(ushape[:-1]),ushape[-1]))
-    ## multiply the matrices, reshape back to a movie, and cast as uint16
-    #Y = np.reshape(np.matmul(U, V), (*ushape[:-1], vshape[-1])).astype(np.uint16)
-    #print("Y.shape:", Y.shape)
-    #print("done")
-    #print("np.save...")
-    #np.savez(os.path.join(args.outdir, "demo_results.npz"), U, V)
-    ##np.save("/output/demo_results.U.npy", U)
-    ##np.save("/output/demo_results.V.npy", V)
-    #print("scipy.io.savemat...")
-    #savemat(file_name='/output/demo_results.Y.mat', mdict={'Y':Y, 'latent_dim':ushape[-1]})
-
-    # TODO - can the latent dimension be read from the "spatial_components" or "temporal_components" objects?
-    savemat(file_name='/output/pmd-output.mat', mdict={'Y':mov_denoised.astype(np.uint16), 'U':U, 'V':V})
+    savemat(file_name='/output/pmd-output.mat', mdict={'U':U, 'V':V})
     print("done")
 
 if __name__ == "__main__":

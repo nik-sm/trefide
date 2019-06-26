@@ -51,6 +51,8 @@ COPY demos ./demos
 
 # TODO avoid module import issues
 COPY run_pmd.py /usr/local/envs/trefide/lib/python3.6/site-packages/run_pmd.py
+# run_readwrite just tests scipy.io.savemat
+#COPY run_readwrite.py /usr/local/envs/trefide/lib/python3.6/site-packages/run_readwrite.py
 
 #CMD "source activate trefide && source /opt/intel/mkl/bin/mklvars.sh intel64 && jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --allow-root --debug"
 CMD /bin/bash -c "source activate trefide && jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --allow-root --debug"
