@@ -43,7 +43,7 @@ WORKDIR /
 RUN conda create -n trefide python=3.6 trefide -c jw3132 -c intel
 RUN /bin/bash -c "source activate trefide && python setup.py install"
 
-RUN /bin/bash -c "conda install -n trefide py-opencv mkl"
+RUN /bin/bash -c "conda install -n trefide py-opencv mkl h5py"
 
 COPY jupyter_notebook_config.py /root/.jupyter/jupyter_notebook_config.py
 
