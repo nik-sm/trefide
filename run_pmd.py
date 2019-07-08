@@ -47,7 +47,7 @@ def main():
     intermediate_outputs['args'] = args
 
     print("Begin with arguments: ", args)
-    time_info['begin'] = time.time()
+    t00 = time.time()
     print("loading movie: {}...".format(args.infile))
 
     # NOTE - matlab produces a fortran-contiguous array (column major order)
@@ -95,7 +95,7 @@ def main():
     
     if args.do_detrend:
         print("detrend movie")
-        to = time.time()
+        t0 = time.time()
         # TODO - unclear what "signal" is supposed to be?
         # should the "del_idx" return value from flag_outliers() be used also?
         # TODO - disc_idx is not working:
@@ -207,12 +207,10 @@ def main():
         outfile['V'] = V.transpose([1,0])
     time_info['save_output'] = time.time() - t0
 
-    t0 = time.time()
-    time_info['end'] = t0
-    time_info['total_duration'] = t0 - time_info['begin']
+    time_info['total_duration'] = time.time() - t00
 
     # TODO - hardcoded paths
-    with open('/output/time_info.pkl', 'wb') as timefile:
+    with open('/output/pmd-time-info.pkl', 'wb') as timefile:
         pickle.dump(time_info, timefile)
     # Can't pickle intermediate_outputs - seems to be lack of __reduce__ method for some of the Cython objects?
     # Traceback (most recent call last):
@@ -222,7 +220,7 @@ def main():
     #    pickle.dump(intermediate_outputs, intermed_file)
     #  File "stringsource", line 2, in View.MemoryView._memoryviewslice.__reduce_cython__
     #TypeError: no default __reduce__ due to non-trivial __cinit__ 
-    #with open('/output/intermediate_outputs.pkl', 'wb') as intermed_file:
+    #with open('/output/intermediate-outputs.pkl', 'wb') as intermed_file:
     #    pickle.dump(intermediate_outputs, intermed_file)
     print("done")
 
