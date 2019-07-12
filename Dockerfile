@@ -56,29 +56,3 @@ COPY run_pmd.py /usr/local/envs/trefide/lib/python3.6/site-packages/run_pmd.py
 
 #CMD "source activate trefide && source /opt/intel/mkl/bin/mklvars.sh intel64 && jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --allow-root --debug"
 CMD /bin/bash -c "source activate trefide && jupyter notebook --port=8888 --no-browser --ip=0.0.0.0 --allow-root --debug"
-
-#############################################
-#############################################
-FROM trefide AS funimag
-
-# TODO - brute force searching for system library dependencies...
-RUN apt-get -y update && apt-get -y install gcc \
-																						libglib2.0-0 \
-																						libsm6 \
-																						libxrender1 \
-																						libfontconfig1 \
-																						libxext6 \
-                                            vim \
-                                            git
-
-# Cache-buster; ADD for content from remote source, always retrieved and compared to cached version
-# https://github.com/moby/moby/issues/14704
-ADD https://api.github.com/repos/nik-sm/funimag/compare/master...HEAD /dev/null
-RUN git clone https://github.com/nik-sm/funimag.git
-
-WORKDIR funimag
-
-EXPOSE 8888
-RUN /bin/bash -c "source activate trefide && pip install -r requirements.txt"
-RUN /bin/bash -c "source activate trefide && pip install -e ."
-CMD /bin/bash -c "source activate trefide && jupyter notebook --no-browser --ip=0.0.0.0 --allow-root --port=8888 --debug"
